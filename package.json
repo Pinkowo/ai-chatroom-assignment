@@ -13,19 +13,20 @@
     "postinstall": "quasar prepare"
   },
   "dependencies": {
-    "@quasar/extras": "1.16.4",
-    "quasar": "2.16.0",
+    "@quasar/extras": "^1.16.15",
+    "quasar": "^2.18.1",
     "vue": "3.5.17",
     "vue-router": "4.5.1"
   },
   "devDependencies": {
     "@quasar/app-vite": "2.1.0",
     "autoprefixer": "10.4.2",
-    "postcss": "8.4.14"
+    "postcss": "8.4.14",
+    "prospec": "^0.1.5"
   },
+  "packageManager": "pnpm@10.11.0",
   "engines": {
-    "node": "^28 || ^26 || ^24 || ^22 || ^20",
-    "npm": ">= 6.13.4",
-    "yarn": ">= 1.21.1"
+    "node": "^22",
+    "pnpm": ">=10"
   }
 }
