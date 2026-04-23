@@ -1,0 +1,1246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nitra AI</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      :root {
+        --brand: #264d4f;
+        --bubble-ai: #f4f5f6;
+        --bubble-user: #a9d4d6;
+        --text: #0d082c;
+        --text-muted: rgba(13, 8, 44, 0.6);
+        --border: #e3e6e8;
+        --btn-disabled: #8f9ca3;
+        --accent: #fb7429;
+        --hint-icon: #64b1b5;
+        --shadow: 0 30px 60px rgba(38, 77, 79, 0.25);
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+      }
+      body {
+        font-family: "Source Sans 3", "Source Sans Pro", system-ui, sans-serif;
+        background: #f2f3f5;
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        padding: 24px;
+      }
+      body.dim::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        background: rgba(15, 30, 32, 0.35);
+        transition: opacity 0.3s ease;
+      }
+      body.no-dim::before {
+        opacity: 0;
+      }
+
+      /* ===================== LAUNCHER (orange pill, always present when closed) ===================== */
+      .launcher {
+        position: fixed;
+        right: 30px;
+        bottom: 30px;
+        z-index: 25;
+        width: 137px;
+        height: 36px;
+        padding: 0 16px;
+        border-radius: 18px;
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        font:
+          600 14px/20px "Inter",
+          sans-serif;
+        letter-spacing: 0.005em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        box-shadow:
+          0 10px 15px rgba(0, 0, 0, 0.1),
+          0 4px 6px rgba(0, 0, 0, 0.1);
+        transition:
+          transform 0.15s,
+          box-shadow 0.2s,
+          filter 0.15s;
+      }
+      .launcher .sparkle {
+        font-size: 12px;
+        color: #fff;
+        flex-shrink: 0;
+      }
+      .launcher:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
+        box-shadow:
+          0 14px 22px rgba(251, 116, 41, 0.35),
+          0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .app.closed .chat-wrap {
+        display: none;
+      }
+
+      /* ===================== CHAT WINDOW ===================== */
+      .chat-wrap {
+        position: fixed;
+        right: 30px;
+        bottom: 78px;
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 12px;
+      }
+      .chat {
+        width: 780px;
+        height: 591px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transform-origin: bottom right;
+      }
+      .app.open .chat {
+        animation: pop 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+      }
+      .app.closing .chat {
+        animation: popOut 0.22s ease forwards;
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: scale(0.94) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      @keyframes popOut {
+        to {
+          opacity: 0;
+          transform: scale(0.94) translateY(10px);
+        }
+      }
+
+      .app.expanded .chat {
+        width: min(1100px, calc(100vw - 48px));
+        height: min(860px, calc(100vh - 120px));
+      }
+
+      /* ===================== HEADER ===================== */
+      .chat-header {
+        background: var(--brand);
+        color: #fff;
+        padding: 18px 20px;
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        border-radius: 8px 8px 0 0;
+      }
+      .chat-header .emblem {
+        width: 46px;
+        height: 23px;
+        margin-top: 7px;
+        flex-shrink: 0;
+        display: inline-block;
+      }
+      .chat-header .titles {
+        flex: 1;
+        min-width: 0;
+      }
+      .chat-header .title-row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .chat-header h1 {
+        margin: 0;
+        font:
+          700 30px/1 "Source Sans 3",
+          "Source Sans Pro",
+          sans-serif;
+        color: #fff;
+        letter-spacing: -0.005em;
+      }
+      .chat-header .wand {
+        font-size: 24px;
+        color: #fff;
+        opacity: 0.95;
+      }
+      .chat-header .subtitle {
+        margin-top: 4px;
+        font:
+          400 16px/1.5 "Source Sans 3",
+          "Source Sans Pro",
+          sans-serif;
+        color: #fff;
+      }
+      .chat-header .actions {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        display: flex;
+        gap: 2px;
+      }
+      .chat-header .actions .icon-btn i {
+        font-size: 16px;
+      }
+      .chat-header .icon-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 4px;
+        border: none;
+        background: transparent;
+        color: #fff;
+        opacity: 0.85;
+        cursor: pointer;
+        display: grid;
+        place-items: center;
+        font-size: 14px;
+        transition:
+          background 0.15s,
+          opacity 0.15s;
+      }
+      .chat-header .icon-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        opacity: 1;
+      }
+
+      /* ===================== BODY ===================== */
+      .chat-body {
+        flex: 1;
+        background: #fff;
+        padding: 32px 20px 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        scroll-behavior: smooth;
+      }
+      .chat-body::-webkit-scrollbar {
+        width: 6px;
+      }
+      .chat-body::-webkit-scrollbar-thumb {
+        background: #e0e3e5;
+        border-radius: 3px;
+      }
+
+      .msg {
+        display: flex;
+        gap: 10px;
+        max-width: 100%;
+      }
+      .msg.user {
+        justify-content: flex-end;
+        padding: 0 90px 0 0;
+      }
+      .app.motion-on .msg {
+        animation: slide 0.32s cubic-bezier(0.2, 0.9, 0.3, 1.1) both;
+      }
+      @keyframes slide {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .avatar {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        margin-top: 6px;
+      }
+      .avatar svg {
+        width: 24px;
+        height: 24px;
+        display: block;
+      }
+
+      .bubble {
+        padding: 10px 16px;
+        font:
+          400 16px/1.4 "Inter",
+          sans-serif;
+        color: var(--text);
+        letter-spacing: 0.5px;
+        word-wrap: break-word;
+        max-width: calc(100% - 40px);
+      }
+      .bubble.ai {
+        background: var(--bubble-ai);
+        border-radius: 0 10px 10px 10px;
+      }
+      .bubble.user {
+        background: var(--bubble-user);
+        border-radius: 10px 0 10px 10px;
+        color: #000;
+        max-width: 100%;
+      }
+
+      /* Thinking dots */
+      .bubble.thinking {
+        padding: 14px 18px;
+        display: inline-flex;
+        gap: 5px;
+        align-items: center;
+      }
+      .thinking .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #73838c;
+        animation: dot 1.3s ease-in-out infinite;
+      }
+      .thinking .dot:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .thinking .dot:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      @keyframes dot {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.5;
+        }
+        30% {
+          transform: translateY(-4px);
+          opacity: 1;
+        }
+      }
+      .app.motion-off .thinking .dot {
+        animation: none;
+        opacity: 1;
+      }
+      .app.motion-off .msg {
+        animation: none;
+      }
+
+      /* Streaming caret */
+      .streaming::after {
+        content: "▍";
+        color: var(--brand);
+        font-weight: 300;
+        display: inline-block;
+        margin-left: 2px;
+        animation: caret 1s steps(2) infinite;
+      }
+      .app.motion-off .streaming::after {
+        animation: none;
+      }
+      @keyframes caret {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      /* AI list response formatting (matches Figma) */
+      .ai-response {
+        white-space: pre-wrap;
+      }
+      .ai-response .num {
+        font-weight: 700;
+      }
+      .ai-response .link {
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        cursor: pointer;
+      }
+      .ai-response .link:hover { text-decoration: none; }
+      /* Fixed body-level tooltip — escapes overflow:hidden */
+      .link-tip {
+        position: fixed;
+        z-index: 9999;
+        background: rgba(13,8,44,0.88);
+        color: #fff;
+        padding: 5px 9px;
+        border-radius: 5px;
+        font: 400 11px/1.5 'Inter',sans-serif;
+        max-width: min(700px, calc(100vw - 16px));
+        white-space: normal;
+        word-break: break-all;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.12s;
+      }
+
+      /* Error bubble */
+      .bubble.error {
+        background: #fcebea;
+        color: #a51b14;
+        border-radius: 0 10px 10px 10px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .bubble.error i {
+        margin-top: 3px;
+      }
+      .bubble.error .retry {
+        background: transparent;
+        border: none;
+        color: #a51b14;
+        font-weight: 700;
+        text-decoration: underline;
+        cursor: pointer;
+        padding: 0;
+        margin-top: 4px;
+        font-family: inherit;
+        font-size: 14px;
+      }
+
+      /* Rotating hint carousel (default state) */
+      .hint-carousel {
+        margin-top: auto;
+        height: 33px;
+        position: relative;
+        overflow: hidden;
+      }
+      .hint-item {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font:
+          400 14px/17px "Inter",
+          sans-serif;
+        color: #5c6970;
+        opacity: 0;
+        transform: translateY(22px);
+        transition:
+          opacity 0.45s ease,
+          transform 0.45s ease;
+        pointer-events: none;
+      }
+      .hint-item.active {
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: auto;
+      }
+      .hint-item.exit {
+        opacity: 0;
+        transform: translateY(-22px);
+      }
+      .hint-item i {
+        color: var(--hint-icon);
+        font-size: 16px;
+        width: 16px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .hint-item .text {
+        cursor: pointer;
+      }
+      .hint-item .text:hover {
+        color: var(--brand);
+      }
+      .app.motion-off .hint-item {
+        transition: none;
+      }
+
+      /* ===================== INPUT ===================== */
+      .chat-input {
+        border-top: 1px solid var(--border);
+        height: 68px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        background: #fff;
+        border-radius: 0 0 8px 8px;
+      }
+      .chat-input .input-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-shrink: 0;
+      }
+      .chat-input input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        font:
+          400 16px/24px "Source Sans 3",
+          "Source Sans Pro",
+          sans-serif;
+        color: var(--text);
+        padding: 0;
+      }
+      .chat-input input::placeholder {
+        color: var(--text-muted);
+      }
+      .chat-input input:disabled {
+        cursor: not-allowed;
+      }
+
+      .chat-input .attach {
+        width: 20px;
+        height: 20px;
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 20px;
+        display: grid;
+        place-items: center;
+        padding: 0;
+        transition: color 0.15s;
+      }
+      .chat-input .attach:hover {
+        color: var(--text);
+      }
+
+      .send-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: var(--brand);
+        color: #fff;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition:
+          background 0.15s,
+          transform 0.15s;
+        font-size: 14px;
+      }
+      .send-btn:hover:not(.disabled):not(.loading) {
+        transform: scale(1.06);
+      }
+      .send-btn.disabled,
+      .send-btn.loading {
+        background: var(--btn-disabled);
+        cursor: not-allowed;
+      }
+      .loading-ring { display: block; width: 18px; height: 18px; }
+      .loading-ring circle {
+        fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round;
+        stroke-dasharray: 56.55; stroke-dashoffset: 56.55;
+        transform-origin: 12px 12px;
+        transform: rotate(-90deg);
+        animation: ring-stroke 1.4s ease-in-out infinite;
+      }
+      .app.motion-off .loading-ring circle { animation: none; stroke-dashoffset: 0; }
+      @keyframes ring-stroke {
+        0%   { stroke-dashoffset: 56.55; }
+        45%  { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: -56.55; }
+      }
+
+      /* ===================== TWEAKS ===================== */
+      .tweaks {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 300;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 16px 16px;
+        width: 220px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+        font-family: "Inter", sans-serif;
+        display: none;
+      }
+      .tweaks.on {
+        display: block;
+      }
+      .tweaks h3 {
+        margin: 0 0 12px;
+        font-size: 11px;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: #73838c;
+        font-weight: 700;
+      }
+      .tweaks .row {
+        margin-bottom: 12px;
+      }
+      .tweaks .row:last-child {
+        margin-bottom: 0;
+      }
+      .tweaks label {
+        display: block;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #73838c;
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      .tweaks .opts {
+        display: flex;
+        gap: 6px;
+      }
+      .tweaks .opt {
+        flex: 1;
+        padding: 7px 10px;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 500;
+        color: #5c6970;
+        font-family: inherit;
+        cursor: pointer;
+      }
+      .tweaks .opt.on {
+        background: var(--brand);
+        color: #fff;
+        border-color: var(--brand);
+      }
+
+      /* ===================== RESPONSIVE ===================== */
+      @media (max-width: 840px) {
+        .chat-wrap {
+          right: 12px;
+          bottom: 70px;
+          left: 12px;
+          align-items: stretch;
+        }
+        .chat {
+          width: 100%;
+          height: calc(100vh - 84px);
+        }
+        .chat-header h1 {
+          font-size: 24px;
+        }
+        .chat-header .subtitle {
+          font-size: 14px;
+        }
+        .msg.user {
+          padding-right: 20px;
+        }
+        .bubble {
+          font-size: 15px;
+        }
+        body {
+          padding: 0;
+        }
+      }
+      @media (max-width: 480px) {
+        .chat-header .emblem {
+          width: 38px;
+          height: 19px;
+        }
+        .chat-header h1 {
+          font-size: 22px;
+        }
+        .chat-body {
+          padding: 20px 14px 14px;
+        }
+        .chat-input {
+          padding: 12px 14px;
+          gap: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body class="dim">
+    <div class="app open motion-on" id="app">
+      <!-- Closed-state launcher (orange pill, from provided spec SVG) -->
+      <button class="launcher" id="launcher" aria-label="Open Nitra AI">
+        <i class="fa-solid fa-wand-magic-sparkles sparkle" aria-hidden="true"></i>
+        <span class="launcher-label">Ask Nitra AI</span>
+      </button>
+
+      <!-- Chat window -->
+      <div class="chat-wrap" id="chatWrap">
+        <div class="chat" id="chat" role="dialog" aria-label="Nitra AI">
+          <header class="chat-header">
+            <span class="emblem" aria-hidden="true">
+              <svg width="46" height="23" viewBox="0 0 46 23" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M34.4991 23C15.9867 22.9468 21.9402 11.5151 11.501 11.5002V0C27.339 0.0230158 23.0696 11.4835 34.4991 11.4998V22.9995V23Z" fill="white"/>
+                <path d="M46 0H34.499V11.4998H46V0Z" fill="white"/>
+                <path d="M11.501 11.4998H0V22.9995H11.501V11.4998Z" fill="white"/>
+              </svg>
+            </span>
+            <div class="titles">
+              <div class="title-row">
+                <h1>Nitra AI</h1>
+                <i
+                  class="fa-solid fa-wand-magic-sparkles wand"
+                  aria-hidden="true"
+                ></i>
+              </div>
+              <div class="subtitle">Hi there, How can we help?</div>
+            </div>
+            <div class="actions">
+              <button
+                class="icon-btn"
+                id="btnClose"
+                title="Close"
+                aria-label="Close"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </header>
+
+          <div class="chat-body" id="chatBody">
+            <!-- Messages injected by JS; rotating suggestion carousel follows -->
+            <div
+              class="hint-carousel"
+              id="hintCarousel"
+              aria-live="polite"
+            ></div>
+          </div>
+
+          <div class="chat-input">
+            <input
+              type="text"
+              id="chatInput"
+              placeholder="Say something..."
+              autocomplete="off"
+            />
+            <div class="input-actions">
+              <button class="attach" id="attachBtn" aria-label="Attach file">
+                <i class="fa-solid fa-paperclip"></i>
+              </button>
+              <button
+                class="send-btn disabled"
+                id="sendBtn"
+                aria-label="Send"
+                disabled
+              >
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tweaks panel (toggled by host) -->
+      <div class="tweaks" id="tweaks">
+        <h3>Tweaks</h3>
+        <div class="row">
+          <label>Dim background</label>
+          <div class="opts">
+            <button class="opt" data-tweak="dim" data-value="true">On</button>
+            <button class="opt" data-tweak="dim" data-value="false">Off</button>
+          </div>
+        </div>
+        <div class="row">
+          <label>Motion</label>
+          <div class="opts">
+            <button class="opt" data-tweak="motion" data-value="true">
+              On
+            </button>
+            <button class="opt" data-tweak="motion" data-value="false">
+              Off
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ============================================================
+   Nitra AI — plain HTML/CSS/JS chat widget
+   Pixel-close to Figma reference; no framework.
+   ============================================================ */
+
+      // ---- Tweakable defaults (edit-mode persistable) ----
+      const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/ {
+        dim: true,
+        motion: true,
+      }; /*EDITMODE-END*/
+
+      const state = {
+        open: true,
+        expanded: false,
+        thinking: false,
+        messages: [], // { role: 'ai'|'user'|'error', text, html, streaming }
+        tweak: { ...TWEAK_DEFAULTS },
+      };
+
+      // ---- Mock responses ----
+      const WELCOME = "Welcome to Nitra AI!";
+      const MOCK_RESPONSES = {
+        "Can you help me compare gloves products from different vendors?":
+          "Certainly! Here are some glove products from different vendors for comparison:\n\n1. **GLOVE SURG SENSICARE PI GRN LF PF 6.0**\n   - Price: $452.59\n   - Vendor: Medline\n   - Brand: MEDLINE\n   - [Product Link](https://nitramart.com/products/glove-surg-sensicare-pi-grn-lf-pf-6-0?variant=46225236558067)\n\n2. **ANSELL MICRO-TOUCH NITRATEX STERILE EXAM GLOVES - Medium**\n   - Price: $184.60\n   - Unit of Measure: CS\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/ansell-micro-touch-nitratex-sterile-exam-gloves-exam-gloves-sterile-medium-pairs-50-prbx-4-bxcs-us-only?variant=46876614033651)\n\n3. **VENTYV SELECT 5.0 NATURAL LATEX EXAM GLOVES (MANATEE)**\n   - Price: $58.91\n   - Unit of Measure: CS\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/ventyv-select-5-0-natural-latex-exam-gloves-manatee-glove-exam-latex-powder-free-pf-textured-natural-white-x-large-90bx-10-bxcs-continental-us-only?variant=46878096752883)\n\n4. **CARDINAL HEALTH POSTIVE TOUCH LATEX EXAM GLOVES**\n   - Price: $128.93\n   - Unit of Measure: CS\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/cardinal-health-postive-touch-latex-exam-gloves-glove-latex-exam-textured-powderless-medium-100bx-10-bxcs-continental-us-only?variant=46877429891315)\n\n5. **GLOVE EXAM LATEX CURAD PF LG**\n   - Price: $15.59\n   - Unit of Measure: 100 Each / Box\n   - Vendor: Medline\n   - [Product Link](https://nitramart.com/products/glove-exam-latex-curad-pf-lg?variant=46224601514227)\n\nWould you like me to highlight the best value option for your needs?",
+
+        "What are the most popular ultrasound gel products purchased by practices like mine?":
+          "Here is a selection of ultrasound gel products that might be popular for practices:\n\n1. **Aquasonic 100 Ultrasound Transmission Gel**\n   - Price: $12.50\n   - Unit of Measure: 1 Liter Bottle\n   - Vendor: Parker Laboratories\n   - [Product Link](https://example.com/products/aquasonic-100-ultrasound-gel-1-liter)\n\n2. **EcoVue Ultrasound Gel**\n   - Price: $10.00\n   - Unit of Measure: 250 mL Bottle\n   - Vendor: HR Pharmaceuticals\n   - [Product Link](https://example.com/products/ecovue-ultrasound-gel-250ml)\n\n3. **TheraPro Ultrasound Gel**\n   - Price: $15.00\n   - Unit of Measure: 5 Liter Jug\n   - Vendor: TheraPro\n   - [Product Link](https://example.com/products/therapro-ultrasound-gel-5-liter)\n\nWould you like me to place an order for any of these ultrasound gel products?",
+
+        "What product has the lowest price available for antibiotic ointments?":
+          "Here is the product with the lowest price available for antibiotic ointments:\n\n1. **FIRST AID ONLY/ACME UNITED ANTISEPTICS, CREAMS & OINTMENTS - PVP Iodine Swabs, 100/bx**\n   - Price: $51.64\n   - Unit of Measure: BX\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/first-aid-onlyacme-united-antiseptics-creams-and-ointments-pvp-iodine-swabs-100bx-drop-ship-only-dollar150-minimum-order?variant=46877187965171)\n\nWould you like to know about other antiseptic products available in the same price range?",
+
+        "How do prices for surgical scissors compare across vendors?":
+          'Here is a comparison of prices for surgical scissors across different vendors:\n\n1. **SKLAR - Iris Scissors, Curved, Sharp/Sharp, 4.5"**\n   - Price: $87.75\n   - Unit of Measure: EA\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/sklar-reuseable-surgical-instruments-iris-scissors-curved-sharpsharp-4-5-drop-ship-only?variant=46877905879283)\n\n2. **SKLAR - Iris Scissors, Curved, Sharp/Sharp, 3.5"**\n   - Price: $92.76\n   - Unit of Measure: EA\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/sklar-reuseable-surgical-instruments-iris-scissors-curved-sharpsharp-3-5-drop-ship-only?variant=46877905748211)\n\n3. **SKLAR - Iris Scissors, Straight, Sharp/Sharp, 4.5"**\n   - Price: $78.57\n   - Unit of Measure: EA\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/sklar-reuseable-surgical-instruments-iris-scissors-straight-sharpsharp-4-5-drop-ship-only?variant=46877905649907)\n\n4. **SKLAR - Iris Scissors, Straight, Sharp/Sharp, 3.5"**\n   - Price: $88.68\n   - Unit of Measure: EA\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/sklar-reuseable-surgical-instruments-iris-scissors-straight-sharpsharp-3-5-drop-ship-only?variant=46877905584371)\n\nWould you like me to highlight the best value option for your needs?',
+
+        "Can you find cheaper substitutes for my masks purchases?":
+          "Certainly! Here are some cost-effective alternatives that may help you save:\n\n1. **BIONIX DISPOSABLE NASAL SPECULUM - 20/bx**\n   - Price: $34.39\n   - Unit of Measure: BX\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/bionix-disposable-nasal-speculum-disposable-nasal-speculum-20bx-us-only-products-cannot-be-sold-on-amazon-com-through-fulfillment-on-amazon-com-or-to-any-other-vendor-who-intends-to-sell-on-amazon-com-or-any-3rd-party-site?variant=46878191321331)\n\n2. **FIRST AID ONLY - Triple Antibiotic Ointment, 144/bx**\n   - Price: $23.12\n   - Unit of Measure: BX\n   - Vendor: Primis\n   - [Product Link](https://nitramart.com/products/first-aid-onlyacme-united-antiseptics-creams-and-ointments-triple-antibiotic-ointment-144bx-drop-ship-only-dollar150-minimum-order?variant=46877347217651)\n\n3. **SCISSORS OR SHARP/BLUNT 4.5 STERILE**\n   - Price: $3.29\n   - Unit of Measure: 1 Each / Each\n   - Vendor: Medline\n   - [Product Link](https://nitramart.com/products/scissors-or-sharpblunt-4-5-sterile?variant=46224698900723)\n\nWould you like me to place an order for any of these cost-effective medical supplies?",
+      };
+      function getAiResponse(userText) {
+        if (MOCK_RESPONSES[userText]) return MOCK_RESPONSES[userText];
+        const lower = userText.toLowerCase();
+        for (const [key, val] of Object.entries(MOCK_RESPONSES)) {
+          const kw = key.split(" ").slice(0, 4).join(" ").toLowerCase();
+          if (lower.includes(kw)) return val;
+        }
+        return Object.values(MOCK_RESPONSES)[0];
+      }
+
+      // ---- DOM refs ----
+      const app = document.getElementById("app");
+      const chatBody = document.getElementById("chatBody");
+      const chatInput = document.getElementById("chatInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const btnClose = document.getElementById("btnClose");
+      const launcher = document.getElementById("launcher");
+      const attachBtn = document.getElementById("attachBtn");
+      const hintEl = document.getElementById("hintCarousel");
+      const tweaksEl = document.getElementById("tweaks");
+
+      // ---- Helpers ----
+      function escapeHtml(s) {
+        return s.replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+      }
+      function mkLink(label, url) {
+        const eu = escapeHtml(url);
+        return `<a class="link" href="${eu}" data-tooltip="${eu}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`;
+      }
+      function formatAiResponse(text) {
+        let safe = escapeHtml(text);
+        safe = safe.replace(/\*\*(.+?)\*\*/g, '<span class="num">$1</span>');
+        safe = safe.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) =>
+          mkLink(label, url),
+        );
+        safe = safe.replace(
+          /&lt;View Product&gt;/g,
+          '<a class="link" data-view="1">View Product</a>',
+        );
+        return safe;
+      }
+      function formatForStreaming(text) {
+        // Render complete bold/link patterns with full styling as they appear;
+        // silently drop incomplete opening markers so no raw markdown is ever visible.
+        let safe = escapeHtml(text);
+        // Complete bold → styled
+        safe = safe.replace(/\*\*(.+?)\*\*/g, '<span class="num">$1</span>');
+        // Complete links → styled
+        safe = safe.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) =>
+          mkLink(label, url),
+        );
+        // Incomplete link at end of string: [label](partial_url — keep label, drop the rest
+        safe = safe.replace(/\[([^\]]*)\]\([^)]*$/, "$1");
+        // Remaining orphaned brackets or unclosed [label
+        safe = safe.replace(/\[([^\]]*)\]?/g, "$1");
+        // Remaining bare asterisks from incomplete bold
+        safe = safe.replace(/\*+/g, "");
+        return safe;
+      }
+
+      // ---- Render a single message ----
+      function renderMessage(msg) {
+        const row = document.createElement("div");
+        row.className = "msg " + (msg.role === "user" ? "user" : "ai");
+
+        if (msg.role !== "user") {
+          const avatar = document.createElement("div");
+          avatar.className = "avatar";
+          avatar.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#264D4F"/><path d="M15.9996 16C9.56054 15.9815 11.6313 12.0053 8.00031 12.0001V8C13.5092 8.00801 12.0242 11.9942 15.9996 11.9999V15.9998V16Z" fill="white"/><path d="M20 8H15.9997V11.9999H20V8Z" fill="white"/><path d="M8.00033 11.9999H4V15.9998H8.00033V11.9999Z" fill="white"/></svg>`;
+          row.appendChild(avatar);
+        }
+
+        const bubble = document.createElement("div");
+        if (msg.role === "error") {
+          bubble.className = "bubble error";
+          bubble.innerHTML = `
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <div>
+        <div>${escapeHtml(msg.text)}</div>
+        <button class="retry" data-retry="1">Try again</button>
+      </div>`;
+        } else if (msg.role === "thinking") {
+          bubble.className = "bubble ai thinking";
+          bubble.innerHTML =
+            '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+        } else if (msg.role === "ai") {
+          bubble.className =
+            "bubble ai ai-response" + (msg.streaming ? " streaming" : "");
+          bubble.innerHTML = formatAiResponse(msg.text || "");
+        } else {
+          bubble.className = "bubble user";
+          bubble.textContent = msg.text;
+        }
+        row.appendChild(bubble);
+        msg._row = row;
+        msg._bubble = bubble;
+        return row;
+      }
+
+      function scrollBottom() {
+        requestAnimationFrame(() => {
+          chatBody.scrollTop = chatBody.scrollHeight;
+        });
+      }
+
+      // ---- Render all messages ----
+      function render() {
+        // Clear message rows but preserve the hint carousel
+        chatBody.querySelectorAll(".msg").forEach((el) => el.remove());
+        const hasUser = state.messages.some((m) => m.role === "user");
+        hintEl.style.display = hasUser ? "none" : "";
+
+        state.messages.forEach((m) => {
+          chatBody.insertBefore(renderMessage(m), hintEl);
+        });
+        scrollBottom();
+      }
+
+      // ---- Button state logic ----
+      function updateSendBtn() {
+        const txt = chatInput.value.trim();
+        sendBtn.classList.remove("disabled", "loading");
+
+        if (state.thinking) {
+          sendBtn.classList.add("loading");
+          sendBtn.disabled = true;
+          sendBtn.innerHTML = '<svg class="loading-ring" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>';
+          chatInput.disabled = true;
+          chatInput.placeholder = "Nitra AI is thinking…";
+        } else {
+          sendBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+          if (!txt) {
+            sendBtn.classList.add("disabled");
+            sendBtn.disabled = true;
+            chatInput.disabled = false;
+            chatInput.placeholder = "Say something...";
+          } else {
+            sendBtn.disabled = false;
+            chatInput.disabled = false;
+            chatInput.placeholder = "Say something...";
+          }
+        }
+      }
+
+      // ---- Streaming effect ----
+      function streamInto(msg, fullText, onDone) {
+        msg.text = "";
+        msg.streaming = true;
+        render();
+        const bubble = msg._bubble;
+        let i = 0;
+        const step = state.tweak.motion ? 3 : fullText.length;
+        const interval = state.tweak.motion ? 22 : 0;
+        const tick = () => {
+          i = Math.min(fullText.length, i + step);
+          // Consume trailing newlines without pausing
+          const nl = fullText.slice(i).match(/^\n+/);
+          if (nl) i = Math.min(fullText.length, i + nl[0].length);
+          // Skip invisible URL text inside [label](url) — jump to closing )
+          if (/\[[^\]]+\]\([^)]*$/.test(fullText.slice(0, i))) {
+            const close = fullText.indexOf(")", i);
+            if (close !== -1) i = Math.min(fullText.length, close + 1);
+          }
+          msg.text = fullText.slice(0, i);
+          bubble.innerHTML = formatForStreaming(msg.text);
+          scrollBottom();
+          if (i < fullText.length) {
+            setTimeout(tick, interval);
+          } else {
+            msg.streaming = false;
+            bubble.classList.remove("streaming");
+            bubble.innerHTML = formatAiResponse(msg.text);
+            onDone && onDone();
+          }
+        };
+        if (state.tweak.motion) tick();
+        else {
+          msg.text = fullText;
+          msg.streaming = false;
+          render();
+          onDone && onDone();
+        }
+      }
+
+      // ---- Flow: send user message → thinking → response ----
+      function sendMessage(text) {
+        text = (text || chatInput.value).trim();
+        if (!text || state.thinking) return;
+        chatInput.value = "";
+
+        state.messages.push({ role: "user", text });
+        render();
+
+        // Transition → thinking
+        state.thinking = true;
+        updateSendBtn();
+        const thinkingMsg = { role: "thinking" };
+        state.messages.push(thinkingMsg);
+        render();
+
+        // Simulated latency — small chance of error to show that state
+        const willError = /\b(error|fail|break)\b/i.test(text); // force error via keyword
+        const delay = 1500;
+
+        setTimeout(() => {
+          // Remove thinking
+          state.messages = state.messages.filter((m) => m !== thinkingMsg);
+
+          if (willError) {
+            state.thinking = false;
+            state.messages.push({
+              role: "error",
+              text: "Sorry, I couldn't reach the product catalog. Please try again.",
+            });
+            render();
+            updateSendBtn();
+            return;
+          }
+
+          // AI response (full list, streamed)
+          const aiMsg = { role: "ai", text: "", streaming: true };
+          state.messages.push(aiMsg);
+          render();
+
+          streamInto(aiMsg, getAiResponse(text), () => {
+            state.thinking = false;
+            updateSendBtn();
+          });
+        }, delay);
+      }
+
+      // ---- Event wiring ----
+      chatInput.addEventListener("input", updateSendBtn);
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      sendBtn.addEventListener("click", () => sendMessage());
+
+      // View-product click + error retry (delegated)
+      chatBody.addEventListener("click", (e) => {
+        if (e.target.closest("[data-view]")) {
+          // No-op link — keep it a realistic dead link in the demo
+          e.preventDefault();
+        }
+        if (e.target.closest("[data-retry]")) {
+          // Remove error and retry the last user message
+          const lastUser = [...state.messages]
+            .reverse()
+            .find((m) => m.role === "user");
+          state.messages = state.messages.filter((m) => m.role !== "error");
+          render();
+          if (lastUser) sendMessage(lastUser.text);
+        }
+      });
+
+      // ---- Fixed link tooltip (escapes overflow:hidden) ----
+      const linkTip = document.createElement('div');
+      linkTip.className = 'link-tip';
+      document.body.appendChild(linkTip);
+
+      function showLinkTip(anchor) {
+        linkTip.textContent = anchor.dataset.tooltip;
+        linkTip.style.top = '-9999px'; linkTip.style.left = '-9999px';
+        linkTip.style.opacity = '0';
+        requestAnimationFrame(() => {
+          const r = anchor.getBoundingClientRect();
+          const tw = linkTip.offsetWidth, th = linkTip.offsetHeight;
+          let left = r.left;
+          let top  = r.top - th - 6;
+          if (left + tw > window.innerWidth - 8) left = window.innerWidth - tw - 8;
+          if (left < 8) left = 8;
+          if (top < 8) top = r.bottom + 6;
+          linkTip.style.left = left + 'px';
+          linkTip.style.top  = top  + 'px';
+          linkTip.style.opacity = '1';
+        });
+      }
+
+      chatBody.addEventListener('mouseover', (e) => {
+        const a = e.target.closest('.link[data-tooltip]');
+        if (a) showLinkTip(a);
+      });
+      chatBody.addEventListener('mouseout', (e) => {
+        if (e.target.closest('.link[data-tooltip]')) linkTip.style.opacity = '0';
+      });
+
+      // Attach + upload — harmless mock
+      function mockFile(label) {
+        // append a small user-style notice instead of modifying messages list
+        const old = chatInput.value;
+        chatInput.value = `📎 ${label} (mock)`;
+        updateSendBtn();
+        chatInput.focus();
+        setTimeout(() => {
+          if (chatInput.value.startsWith("📎")) {
+            chatInput.value = old;
+            updateSendBtn();
+          }
+        }, 1800);
+      }
+      attachBtn.addEventListener("click", () => mockFile("attached-file.csv"));
+
+      // ---- Rotating hint carousel ----
+      const HINTS = [
+        { icon: "fa-regular fa-rectangle-list",  text: "Upload your supplier list" },
+        { icon: "fa-solid fa-cart-shopping",      text: "Check if Avastin is in stock" },
+        { icon: "fa-solid fa-hand-holding-dollar",text: "Check if there's a better price for Xeomin" },
+        { icon: "fa-solid fa-magnifying-glass",   text: "What are some generic options for Restylane" },
+        { icon: "fa-solid fa-thumbs-up",          text: "What's the best product for Xeomin" },
+      ];
+      let hintIdx = 0,
+        hintTimer = null;
+      // Single persistent element; we just fade it out, swap content, fade back in.
+      const hintSlot = document.createElement("div");
+      hintSlot.className = "hint-item active";
+      hintEl.appendChild(hintSlot);
+      function paintHint(h) {
+        hintSlot.innerHTML = `<i class="${h.icon}"></i><span class="text">${h.text.replace(/</g, "&lt;")}</span>`;
+        hintSlot.querySelector(".text").onclick = () => {
+          chatInput.value = h.text;
+          updateSendBtn();
+          chatInput.focus();
+        };
+      }
+      function advanceHint() {
+        if (!state.tweak.motion) {
+          hintIdx = (hintIdx + 1) % HINTS.length;
+          paintHint(HINTS[hintIdx]);
+          return;
+        }
+        hintSlot.classList.remove("active");
+        hintSlot.classList.add("exit");
+        setTimeout(() => {
+          hintIdx = (hintIdx + 1) % HINTS.length;
+          paintHint(HINTS[hintIdx]);
+          hintSlot.style.transition = "none";
+          hintSlot.classList.remove("exit");
+          hintSlot.offsetHeight; // force reflow
+          hintSlot.style.transition = "";
+          // Double-rAF: first frame commits the snap, second starts the transition
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => hintSlot.classList.add("active"))
+          );
+        }, 460);
+      }
+      function startHints() {
+        hintIdx = 0;
+        paintHint(HINTS[0]);
+        hintSlot.classList.add("active");
+        clearInterval(hintTimer);
+        hintTimer = setInterval(advanceHint, 3600);
+      }
+
+      // Close / minimize / expand / reopen
+      function setOpen(v) {
+        if (v) {
+          app.classList.remove("closed", "closing");
+          app.classList.add("open");
+        } else {
+          app.classList.add("closing");
+          setTimeout(
+            () => {
+              app.classList.remove("open", "closing");
+              app.classList.add("closed");
+            },
+            state.tweak.motion ? 220 : 0,
+          );
+        }
+        state.open = v;
+      }
+      btnClose.addEventListener("click", () => setOpen(false));
+      launcher.addEventListener("click", () => setOpen(!state.open));
+
+      // ---- Tweaks (host edit-mode protocol) ----
+      function applyTweaks() {
+        document.body.classList.toggle("dim", !!state.tweak.dim);
+        document.body.classList.toggle("no-dim", !state.tweak.dim);
+        app.classList.toggle("motion-on", !!state.tweak.motion);
+        app.classList.toggle("motion-off", !state.tweak.motion);
+
+        tweaksEl.querySelectorAll(".opt").forEach((btn) => {
+          const k = btn.dataset.tweak;
+          const v = btn.dataset.value === "true";
+          btn.classList.toggle("on", state.tweak[k] === v);
+        });
+      }
+      tweaksEl.addEventListener("click", (e) => {
+        const btn = e.target.closest(".opt");
+        if (!btn) return;
+        const k = btn.dataset.tweak;
+        const v = btn.dataset.value === "true";
+        state.tweak[k] = v;
+        applyTweaks();
+        try {
+          window.parent.postMessage(
+            { type: "__edit_mode_set_keys", edits: { [k]: v } },
+            "*",
+          );
+        } catch {}
+      });
+
+      // Register edit-mode listener FIRST, then announce
+      window.addEventListener("message", (e) => {
+        if (!e.data || typeof e.data !== "object") return;
+        if (e.data.type === "__activate_edit_mode")
+          tweaksEl.classList.add("on");
+        if (e.data.type === "__deactivate_edit_mode")
+          tweaksEl.classList.remove("on");
+      });
+      try {
+        window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+      } catch {}
+
+      // ---- Boot ----
+      state.messages = [{ role: "ai", text: WELCOME }];
+      applyTweaks();
+      render();
+      updateSendBtn();
+      startHints();
+      chatInput.focus();
+    </script>
+  </body>
+</html>
