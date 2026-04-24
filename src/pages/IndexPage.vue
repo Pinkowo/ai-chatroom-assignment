@@ -158,11 +158,11 @@ function shouldAnimate(index: number): boolean {
         <ChatHeader @close="closeWidget" />
 
         <div ref="chatBodyEl" class="chat-body" @wheel.passive="onChatBodyWheel" @scroll.passive="onChatBodyScroll">
-          <!-- Welcome message — animates on every open, matching design.html WELCOME boot message -->
+          <!-- Welcome message — only animates on first actual open (v-show keeps DOM alive) -->
           <ChatBubble
             role="assistant"
             content="Welcome to Nitra AI!"
-            :animate="!welcomeAnimated"
+            :animate="!welcomeAnimated && isOpen"
             @animation-done="welcomeAnimated = true"
           />
 
