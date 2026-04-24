@@ -13,12 +13,22 @@ const store = useChatStore()
 
 const isOpen = ref(false)
 const isClosing = ref(false)
+const welcomeAnimated = ref(false)
 const chatBodyEl = ref<HTMLElement | null>(null)
+const chatPanelEl = ref<HTMLElement | null>(null)
 const composerInputEl = ref<HTMLInputElement | null>(null)
 
 function openWidget(): void {
   isOpen.value = true
   isClosing.value = false
+  // 重新觸發 pop 動畫（v-show 保留 DOM，需手動 reset animation）
+  nextTick(() => {
+    if (chatPanelEl.value) {
+      chatPanelEl.value.style.animation = 'none'
+      void chatPanelEl.value.offsetHeight // force reflow
+      chatPanelEl.value.style.animation = ''
+    }
+  })
 }
 
 function closeWidget(): void {
@@ -47,18 +57,25 @@ function onHintSelect(text: string): void {
 }
 
 const userScrolledUp = ref(false)
-let isProgrammaticScroll = false
 
 function scrollToBottom(): void {
   if (!chatBodyEl.value) return
-  isProgrammaticScroll = true
   chatBodyEl.value.scrollTop = chatBodyEl.value.scrollHeight
-  Promise.resolve().then(() => { isProgrammaticScroll = false })
 }
 
+// deltaY < 0 = 向上滾 → 鎖定自動捲動
+function onChatBodyWheel(e: WheelEvent): void {
+  if (e.deltaY < 0) userScrolledUp.value = true
+}
+
+// 使用者滾回接近底部（≤20px）→ 解除鎖定
+// rAF 鎖住時不會有 programmatic scroll，此時 scroll 事件只來自使用者，不會誤觸
 function onChatBodyScroll(): void {
-  if (isProgrammaticScroll) return
-  userScrolledUp.value = true
+  if (!chatBodyEl.value) return
+  const { scrollTop, scrollHeight, clientHeight } = chatBodyEl.value
+  if (scrollHeight - scrollTop - clientHeight <= 20) {
+    userScrolledUp.value = false
+  }
 }
 
 // Track which turn's suggested question bubble is currently animating
@@ -133,25 +150,34 @@ function shouldAnimate(index: number): boolean {
     <Launcher @toggle="onToggle" />
 
     <div
-      v-if="isOpen || isClosing"
+      v-show="isOpen || isClosing"
       class="chat-wrap"
       :class="{ 'chat-wrap--closing': isClosing }"
     >
-      <div class="chat" role="dialog" aria-label="Nitra AI">
+      <div ref="chatPanelEl" class="chat" role="dialog" aria-label="Nitra AI">
         <ChatHeader @close="closeWidget" />
 
-        <div ref="chatBodyEl" class="chat-body" @scroll.passive="onChatBodyScroll">
+        <div ref="chatBodyEl" class="chat-body" @wheel.passive="onChatBodyWheel" @scroll.passive="onChatBodyScroll">
           <!-- Welcome message — animates on every open, matching design.html WELCOME boot message -->
           <ChatBubble
             role="assistant"
             content="Welcome to Nitra AI!"
-            :animate="true"
+            :animate="!welcomeAnimated"
+            @animation-done="welcomeAnimated = true"
           />
 
           <template v-for="(turn, idx) in store.turns" :key="turn.user.id">
             <!-- User message -->
             <div class="msg msg--user">
-              <div class="msg__bubble msg__bubble--user">{{ turn.user.content }}</div>
+              <div class="msg__bubble msg__bubble--user">
+                <img
+                  v-if="turn.user.imageUrl"
+                  :src="turn.user.imageUrl"
+                  class="msg__bubble-image"
+                  alt="attached image"
+                />
+                <span v-if="turn.user.content">{{ turn.user.content }}</span>
+              </div>
             </div>
 
             <!-- Thinking indicator -->
@@ -271,7 +297,16 @@ function shouldAnimate(index: number): boolean {
       border-radius: 10px 0 10px 10px;
       color: #000;
       max-width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
+  }
+
+  &__bubble-image {
+    max-width: 240px;
+    border-radius: 8px;
+    display: block;
   }
 }
 

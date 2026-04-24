@@ -14,15 +14,16 @@ export const useChatStore = defineStore(
     const isThinking = ref(false)
     const pendingInput = ref('')
 
-    async function sendMessage(text: string): Promise<void> {
+    async function sendMessage(text: string, imageUrl?: string): Promise<void> {
       const trimmed = text.trim()
-      if (!trimmed || isThinking.value) return
+      if ((!trimmed && !imageUrl) || isThinking.value) return
 
       const userMsg: Message = {
         id: newId(),
         role: 'user',
         content: trimmed,
         timestamp: new Date().toISOString(),
+        imageUrl,
       }
 
       isThinking.value = true
