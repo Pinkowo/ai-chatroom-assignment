@@ -8,7 +8,8 @@ node_modules
 CLAUDE.md
 AGENTS.md
 
-# Prospec config
+# Prospec working directory and config
+prospec/
 .prospec.yaml
 
 # Lock files (project uses pnpm)
