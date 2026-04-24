@@ -48,7 +48,7 @@ export default defineConfig((/* ctx */) => {
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
-      // publicPath: '/',
+      publicPath: process.env.NODE_ENV === 'production' ? '/ai-chatroom-assignment/' : '/',
       // analyze: true,
       // env: {},
       // rawDefine: {}
