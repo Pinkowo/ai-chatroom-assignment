@@ -1,0 +1,19 @@
+version: "1.0"
+project:
+  name: ai-chatroom-assignment
+tech_stack:
+  language: typescript
+  package_manager: pnpm
+  framework: vue
+paths:
+  base_dir: prospec
+exclude:
+  - "*.env*"
+  - "*credential*"
+  - "*secret*"
+  - node_modules
+  - .git
+agents:
+  - claude
+knowledge:
+  base_path: prospec/ai-knowledge

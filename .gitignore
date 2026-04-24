@@ -8,9 +8,8 @@ node_modules
 CLAUDE.md
 AGENTS.md
 
-# Prospec working directory and config
-prospec/
-.prospec.yaml
+# Prospec in-progress change working directory
+.prospec
 
 # Lock files (project uses pnpm)
 yarn.lock
