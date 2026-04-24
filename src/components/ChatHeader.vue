@@ -71,14 +71,14 @@ defineEmits<{ (e: 'close'): void }>()
   }
 
   &__wand {
-    font-size: 24px;
+    font-size: var(--font-size-2xl);
     color: #fff;
     opacity: 0.95;
   }
 
   &__subtitle {
     margin-top: 4px;
-    font: 400 16px/1.5 'Source Sans 3', 'Source Sans Pro', sans-serif;
+    font: 400 var(--font-size-md)/1.5 'Source Sans 3', 'Source Sans Pro', sans-serif;
     color: #fff;
   }
 
@@ -101,7 +101,7 @@ defineEmits<{ (e: 'close'): void }>()
     cursor: pointer;
     display: grid;
     place-items: center;
-    font-size: 16px;
+    font-size: var(--font-size-md);
     transition: background 0.15s, opacity 0.15s;
 
     &:hover {
@@ -123,7 +123,7 @@ defineEmits<{ (e: 'close'): void }>()
     }
 
     &__subtitle {
-      font-size: 14px;
+      font-size: var(--font-size-sm);
     }
   }
 }

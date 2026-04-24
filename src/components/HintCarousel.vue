@@ -94,7 +94,7 @@ function onHintClick(text: string): void {
   display: flex;
   align-items: center;
   gap: 8px;
-  font: 400 14px/17px 'Inter', sans-serif;
+  font: 400 var(--font-size-sm)/17px 'Inter', sans-serif;
   color: $gray-700;
   opacity: 0;
   transform: translateY(22px);
@@ -114,7 +114,7 @@ function onHintClick(text: string): void {
 
   &__icon {
     color: $teal-300;
-    font-size: 16px;
+    font-size: var(--font-size-md);
     width: 16px;
     text-align: center;
     flex-shrink: 0;

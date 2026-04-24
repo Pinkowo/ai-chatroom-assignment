@@ -287,7 +287,7 @@ function shouldAnimate(index: number): boolean {
 
   &__bubble {
     padding: 10px 16px;
-    font: 400 16px/1.4 'Inter', sans-serif;
+    font: 400 var(--font-size-md)/1.4 'Inter', sans-serif;
     color: var(--text);
     word-wrap: break-word;
     max-width: calc(100% - 40px);

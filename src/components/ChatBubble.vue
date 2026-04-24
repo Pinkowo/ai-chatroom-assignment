@@ -112,7 +112,7 @@ function onMouseOut(e: MouseEvent): void {
   &__bubble {
     padding: 10px 16px;
     font:
-      400 16px/1.4 "Inter",
+      400 var(--font-size-md)/1.4 "Inter",
       sans-serif;
     color: var(--text);
     letter-spacing: 0.5px;

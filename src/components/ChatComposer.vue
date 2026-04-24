@@ -185,7 +185,7 @@ defineExpose({ inputEl })
     border: none;
     background: $gray-600;
     color: #fff;
-    font-size: 10px;
+    font-size: var(--font-size-xss);
     line-height: 1;
     cursor: pointer;
     display: grid;
@@ -208,7 +208,7 @@ defineExpose({ inputEl })
     border: none;
     outline: none;
     background: transparent;
-    font: 400 16px/24px 'Source Sans 3', 'Source Sans Pro', sans-serif;
+    font: 400 var(--font-size-md)/24px 'Source Sans 3', 'Source Sans Pro', sans-serif;
     color: var(--text);
     padding: 0;
 
@@ -235,7 +235,7 @@ defineExpose({ inputEl })
     border: none;
     color: var(--text-muted);
     cursor: pointer;
-    font-size: 20px;
+    font-size: var(--font-size-xl);
     display: grid;
     place-items: center;
     padding: 0;
@@ -257,7 +257,7 @@ defineExpose({ inputEl })
     place-items: center;
     cursor: pointer;
     flex-shrink: 0;
-    font-size: 14px;
+    font-size: var(--font-size-sm);
     transition: background 0.15s, transform 0.15s;
 
     &:hover:not(:disabled) {

@@ -46,7 +46,7 @@
   }
 
   &__label {
-    font: 400 16px/1.4 'Inter', sans-serif;
+    font: 400 var(--font-size-md)/1.4 'Inter', sans-serif;
     color: var(--text-muted);
     margin-right: 2px;
   }

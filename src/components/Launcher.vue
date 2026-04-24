@@ -27,7 +27,7 @@ defineEmits<{ (e: 'toggle'): void }>()
   border: none;
   background: $orange-400;
   color: #fff;
-  font: 600 14px/20px 'Inter', sans-serif;
+  font: 600 var(--font-size-sm)/20px 'Inter', sans-serif;
   letter-spacing: 0.005em;
   display: inline-flex;
   align-items: center;
@@ -44,7 +44,7 @@ defineEmits<{ (e: 'toggle'): void }>()
   }
 
   &__sparkle {
-    font-size: 12px;
+    font-size: var(--font-size-xs);
     color: #fff;
     flex-shrink: 0;
   }
