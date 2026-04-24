@@ -54,28 +54,32 @@ pnpm test
 ## UX Features
 
 ### Markdown rendering
+
 AI responses are parsed from Markdown to HTML — users see formatted text, bullet lists, and bold/italic, never raw `**syntax**`.
 
 ### Image attachment
+
 Users can attach an image (up to 5 MB) alongside their message. A thumbnail preview appears before sending; the image is shown in the user bubble after send. Memory is managed via `URL.createObjectURL` / `revokeObjectURL`.
 
 ### Responsive layout
+
 The widget adapts from a `780 × 591 px` floating panel on desktop to a full-viewport panel on screens narrower than 840 px.
 
 ### Smart auto-scroll
+
 While the AI streams its response, the chat body scrolls automatically. Scrolling up (wheel `deltaY < 0`) locks auto-scroll so users can read earlier messages; scrolling back within 20 px of the bottom re-enables it.
 
 ## Tests
 
 5 test suites, ~460 lines:
 
-| File | What it covers |
-|------|----------------|
-| `chat-store.spec.ts` | `sendMessage`, `fillComposer`, `clearHistory`, image-only send, duplicate-send guard |
-| `chat-composer.spec.ts` | File picker preview, 5 MB validation, clear button, URL revocation |
-| `matcher.spec.ts` | Fuzzy match scoring, fallback response, suggested question passthrough |
-| `markdown-parser.spec.ts` | Bold, italic, links, numbered lists, `renderPartial` safety |
-| `hint-carousel.spec.ts` | Hint rotation, click-to-fill, visibility based on message history |
+| File                      | What it covers                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------ |
+| `chat-store.spec.ts`      | `sendMessage`, `fillComposer`, `clearHistory`, image-only send, duplicate-send guard |
+| `chat-composer.spec.ts`   | File picker preview, 5 MB validation, clear button, URL revocation                   |
+| `matcher.spec.ts`         | Fuzzy match scoring, fallback response, suggested question passthrough               |
+| `markdown-parser.spec.ts` | Bold, italic, links, numbered lists, `renderPartial` safety                          |
+| `hint-carousel.spec.ts`   | Hint rotation, click-to-fill, visibility based on message history                    |
 
 ```bash
 pnpm test
