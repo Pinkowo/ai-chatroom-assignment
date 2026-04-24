@@ -46,10 +46,19 @@ function onHintSelect(text: string): void {
   nextTick(() => composerInputEl.value?.focus())
 }
 
+const userScrolledUp = ref(false)
+let isProgrammaticScroll = false
+
 function scrollToBottom(): void {
-  if (chatBodyEl.value) {
-    chatBodyEl.value.scrollTop = chatBodyEl.value.scrollHeight
-  }
+  if (!chatBodyEl.value) return
+  isProgrammaticScroll = true
+  chatBodyEl.value.scrollTop = chatBodyEl.value.scrollHeight
+  Promise.resolve().then(() => { isProgrammaticScroll = false })
+}
+
+function onChatBodyScroll(): void {
+  if (isProgrammaticScroll) return
+  userScrolledUp.value = true
 }
 
 // Track which turn's suggested question bubble is currently animating
@@ -70,7 +79,7 @@ function onSuggestedBubbleDone(): void {
 let scrollRafId: number | null = null
 
 function startScrollLoop(): void {
-  scrollToBottom()
+  if (!userScrolledUp.value) scrollToBottom()
   if (store.isThinking || suggestedAnimateTurnId.value !== null) {
     scrollRafId = requestAnimationFrame(startScrollLoop)
   }
@@ -88,7 +97,7 @@ watch(() => store.isThinking, (thinking) => {
     startScrollLoop()
   } else {
     stopScrollLoop()
-    nextTick(scrollToBottom)
+    if (!userScrolledUp.value) nextTick(scrollToBottom)
   }
 })
 
@@ -97,12 +106,15 @@ watch(suggestedAnimateTurnId, (id) => {
     startScrollLoop()
   } else {
     stopScrollLoop()
-    nextTick(scrollToBottom)
+    if (!userScrolledUp.value) nextTick(scrollToBottom)
   }
 })
 
-// Also scroll when a new turn is added (user message appears)
-watch(() => store.turns.length, () => nextTick(scrollToBottom))
+// New turn = user just sent — always scroll to bottom and unlock auto-scroll
+watch(() => store.turns.length, () => {
+  userScrolledUp.value = false
+  nextTick(scrollToBottom)
+})
 
 onUnmounted(stopScrollLoop)
 
@@ -128,7 +140,7 @@ function shouldAnimate(index: number): boolean {
       <div class="chat" role="dialog" aria-label="Nitra AI">
         <ChatHeader @close="closeWidget" />
 
-        <div ref="chatBodyEl" class="chat-body">
+        <div ref="chatBodyEl" class="chat-body" @scroll.passive="onChatBodyScroll">
           <!-- Welcome message — animates on every open, matching design.html WELCOME boot message -->
           <ChatBubble
             role="assistant"
@@ -225,7 +237,6 @@ function shouldAnimate(index: number): boolean {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  scroll-behavior: smooth;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -245,7 +256,7 @@ function shouldAnimate(index: number): boolean {
 
   &--user {
     justify-content: flex-end;
-    padding: 0 90px 0 0;
+    padding: 0 0 0 90px;
   }
 
   &__bubble {
