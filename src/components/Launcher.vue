@@ -40,7 +40,7 @@ defineEmits<{ (e: 'toggle'): void }>()
   &:hover {
     transform: translateY(-1px);
     filter: brightness(1.05);
-    box-shadow: 0 14px 22px rgba(251, 116, 41, 0.35), 0 4px 6px rgba(0,0,0,0.1);
+    box-shadow: 0 14px 22px rgba($orange-400, 0.35), 0 4px 6px rgba(0,0,0,0.1);
   }
 
   &__sparkle {

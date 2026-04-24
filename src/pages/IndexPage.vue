@@ -219,7 +219,7 @@ function shouldAnimate(index: number): boolean {
 
 <style scoped lang="scss">
 .chat-widget-page {
-  background: #f2f3f5;
+  background: $gray-0;
   min-height: 100vh;
 }
 
@@ -269,7 +269,7 @@ function shouldAnimate(index: number): boolean {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #e0e3e5;
+    background: $gray-100;
     border-radius: 3px;
   }
 }
@@ -295,7 +295,7 @@ function shouldAnimate(index: number): boolean {
     &--user {
       background: var(--bubble-user);
       border-radius: 10px 0 10px 10px;
-      color: #000;
+      color: var(--text);
       max-width: 100%;
       display: flex;
       flex-direction: column;

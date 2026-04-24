@@ -50,7 +50,7 @@ function onMouseOut(e: MouseEvent): void {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <circle cx="12" cy="12" r="12" fill="#264D4F" />
+        <circle cx="12" cy="12" r="12" />
         <path
           d="M15.9996 16C9.56054 15.9815 11.6313 12.0053 8.00031 12.0001V8C13.5092 8.00801 12.0242 11.9942 15.9996 11.9999V15.9998V16Z"
           fill="white"
@@ -105,6 +105,8 @@ function onMouseOut(e: MouseEvent): void {
     height: 24px;
     flex-shrink: 0;
     margin-top: 6px;
+
+    circle { fill: $teal-700; }
   }
 
   &__bubble {
@@ -126,7 +128,7 @@ function onMouseOut(e: MouseEvent): void {
     &--user {
       background: var(--bubble-user);
       border-radius: 10px 0 10px 10px;
-      color: #000;
+      color: var(--text);
       max-width: 100%;
     }
   }

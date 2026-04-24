@@ -6,7 +6,7 @@
   <div class="thinking-row" aria-label="AI is thinking">
     <div class="thinking-row__avatar" aria-hidden="true">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="12" fill="#264D4F"/>
+        <circle cx="12" cy="12" r="12" />
         <path d="M15.9996 16C9.56054 15.9815 11.6313 12.0053 8.00031 12.0001V8C13.5092 8.00801 12.0242 11.9942 15.9996 11.9999V15.9998V16Z" fill="white"/>
         <path d="M20 8H15.9997V11.9999H20V8Z" fill="white"/>
         <path d="M8.00033 11.9999H4V15.9998H8.00033V11.9999Z" fill="white"/>
@@ -32,6 +32,8 @@
     height: 24px;
     flex-shrink: 0;
     margin-top: 6px;
+
+    circle { fill: $teal-700; }
   }
 
   &__bubble {
