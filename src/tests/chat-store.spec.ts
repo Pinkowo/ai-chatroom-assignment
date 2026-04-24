@@ -20,8 +20,12 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-async function sendAndFlush(store: ReturnType<typeof useChatStore>, text: string): Promise<void> {
-  const promise = store.sendMessage(text)
+async function sendAndFlush(
+  store: ReturnType<typeof useChatStore>,
+  text: string,
+  imageUrl?: string,
+): Promise<void> {
+  const promise = store.sendMessage(text, imageUrl)
   await vi.runAllTimersAsync()
   await promise
 }
@@ -64,6 +68,25 @@ describe('useChatStore', () => {
     it('ignores whitespace-only input', async () => {
       const store = useChatStore()
       await sendAndFlush(store, '   ')
+      expect(store.turns).toHaveLength(0)
+    })
+
+    it('stores imageUrl in user message when provided', async () => {
+      const store = useChatStore()
+      await sendAndFlush(store, 'look at this', 'blob:mock-url')
+      expect(store.turns[0]!.user.imageUrl).toBe('blob:mock-url')
+    })
+
+    it('allows send with imageUrl and no text', async () => {
+      const store = useChatStore()
+      await sendAndFlush(store, '', 'blob:mock-url')
+      expect(store.turns).toHaveLength(1)
+      expect(store.turns[0]!.user.imageUrl).toBe('blob:mock-url')
+    })
+
+    it('ignores empty text with no imageUrl', async () => {
+      const store = useChatStore()
+      await sendAndFlush(store, '')
       expect(store.turns).toHaveLength(0)
     })
 
