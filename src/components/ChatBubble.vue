@@ -1,40 +1,40 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import TypewriterText from 'src/components/TypewriterText.vue'
-import LinkTooltip from 'src/components/LinkTooltip.vue'
-import { useChatStore } from 'src/stores/chat'
-import { renderFull } from 'src/services/markdown-parser'
+import { ref } from "vue";
+import TypewriterText from "src/components/TypewriterText.vue";
+import LinkTooltip from "src/components/LinkTooltip.vue";
+import { useChatStore } from "src/stores/chat";
+import { renderFull } from "src/services/markdown-parser";
 
 const props = defineProps<{
-  role: 'user' | 'assistant'
-  content: string
-  animate?: boolean
-}>()
+  role: "user" | "assistant";
+  content: string;
+  animate?: boolean;
+}>();
 
-const emit = defineEmits<{ (e: 'animationDone'): void }>()
+const emit = defineEmits<{ (e: "animationDone"): void }>();
 
-const store = useChatStore()
+const store = useChatStore();
 
-const tooltipText = ref('')
-const tooltipAnchor = ref<HTMLElement | null>(null)
-const tooltipVisible = ref(false)
+const tooltipText = ref("");
+const tooltipAnchor = ref<HTMLElement | null>(null);
+const tooltipVisible = ref(false);
 
 function onDone(): void {
-  store.markThinkingDone()
-  emit('animationDone')
+  store.markThinkingDone();
+  emit("animationDone");
 }
 
 function onMouseOver(e: MouseEvent): void {
-  const a = (e.target as HTMLElement).closest<HTMLElement>('a[data-tooltip]')
-  if (!a) return
-  tooltipText.value = a.dataset.tooltip ?? ''
-  tooltipAnchor.value = a
-  tooltipVisible.value = true
+  const a = (e.target as HTMLElement).closest<HTMLElement>("a[data-tooltip]");
+  if (!a) return;
+  tooltipText.value = a.dataset.tooltip ?? "";
+  tooltipAnchor.value = a;
+  tooltipVisible.value = true;
 }
 
 function onMouseOut(e: MouseEvent): void {
-  if ((e.target as HTMLElement).closest('a[data-tooltip]')) {
-    tooltipVisible.value = false
+  if ((e.target as HTMLElement).closest("a[data-tooltip]")) {
+    tooltipVisible.value = false;
   }
 }
 </script>
@@ -43,11 +43,20 @@ function onMouseOut(e: MouseEvent): void {
   <div class="msg" :class="role === 'user' ? 'msg--user' : 'msg--ai'">
     <!-- AI avatar -->
     <div v-if="role === 'assistant'" class="msg__avatar" aria-hidden="true">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="12" fill="#264D4F"/>
-        <path d="M15.9996 16C9.56054 15.9815 11.6313 12.0053 8.00031 12.0001V8C13.5092 8.00801 12.0242 11.9942 15.9996 11.9999V15.9998V16Z" fill="white"/>
-        <path d="M20 8H15.9997V11.9999H20V8Z" fill="white"/>
-        <path d="M8.00033 11.9999H4V15.9998H8.00033V11.9999Z" fill="white"/>
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="12" cy="12" r="12" fill="#264D4F" />
+        <path
+          d="M15.9996 16C9.56054 15.9815 11.6313 12.0053 8.00031 12.0001V8C13.5092 8.00801 12.0242 11.9942 15.9996 11.9999V15.9998V16Z"
+          fill="white"
+        />
+        <path d="M20 8H15.9997V11.9999H20V8Z" fill="white" />
+        <path d="M8.00033 11.9999H4V15.9998H8.00033V11.9999Z" fill="white" />
       </svg>
     </div>
 
@@ -68,7 +77,11 @@ function onMouseOut(e: MouseEvent): void {
       </template>
     </div>
 
-    <LinkTooltip :text="tooltipText" :anchor-el="tooltipAnchor" :visible="tooltipVisible" />
+    <LinkTooltip
+      :text="tooltipText"
+      :anchor-el="tooltipAnchor"
+      :visible="tooltipVisible"
+    />
   </div>
 </template>
 
@@ -83,6 +96,10 @@ function onMouseOut(e: MouseEvent): void {
     justify-content: flex-end;
   }
 
+  &--ai {
+    padding-right: 120px;
+  }
+
   &__avatar {
     width: 24px;
     height: 24px;
@@ -92,7 +109,9 @@ function onMouseOut(e: MouseEvent): void {
 
   &__bubble {
     padding: 10px 16px;
-    font: 400 16px/1.4 'Inter', sans-serif;
+    font:
+      400 16px/1.4 "Inter",
+      sans-serif;
     color: var(--text);
     letter-spacing: 0.5px;
     word-wrap: break-word;
@@ -102,7 +121,6 @@ function onMouseOut(e: MouseEvent): void {
       background: var(--bubble-ai);
       border-radius: 0 10px 10px 10px;
       white-space: pre-wrap;
-
     }
 
     &--user {
