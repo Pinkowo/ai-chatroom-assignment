@@ -13,6 +13,7 @@
       </svg>
     </div>
     <div class="thinking-row__bubble">
+      <span class="thinking-row__label">Thinking</span>
       <span class="thinking-row__dot" />
       <span class="thinking-row__dot" />
       <span class="thinking-row__dot" />
@@ -36,10 +37,16 @@
   &__bubble {
     background: var(--bubble-ai);
     border-radius: 0 10px 10px 10px;
-    padding: 14px 18px;
+    padding: 10px 16px;
     display: inline-flex;
     gap: 5px;
     align-items: center;
+  }
+
+  &__label {
+    font: 400 16px/1.4 'Inter', sans-serif;
+    color: var(--text-muted);
+    margin-right: 2px;
   }
 
   &__dot {
@@ -48,22 +55,16 @@
     height: 7px;
     border-radius: 50%;
     background: $gray-600;
-    animation: thinking-dot 1.3s ease-in-out infinite;
+    animation: thinking-dot 1.2s ease-in-out infinite;
 
-    &:nth-child(2) { animation-delay: 0.15s; }
-    &:nth-child(3) { animation-delay: 0.3s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+    &:nth-child(4) { animation-delay: 0.8s; }
   }
 }
 
 @keyframes thinking-dot {
-  0%, 60%, 100% {
-    transform: translateY(0);
-    opacity: 0.5;
-  }
-  30% {
-    transform: translateY(-4px);
-    opacity: 1;
-  }
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
 }
 
 .motion-off .thinking-row__dot {
