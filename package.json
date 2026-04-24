@@ -2,7 +2,7 @@
   "name": "ai-chatroom-assignment",
   "version": "0.0.1",
   "description": "This is the basic setup for the AI Chatroom Assignment. You can use it as a starting point to implement the requirements and bring in any libraries you’re comfortable with.",
-  "productName": "Quasar App",
+  "productName": "Nitra AI",
   "author": "Nitra Frontend Team",
   "type": "module",
   "private": true,
