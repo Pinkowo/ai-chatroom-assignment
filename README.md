@@ -12,6 +12,7 @@ A floating AI chat widget built with Quasar + Vue 3.
 - Smart auto-scroll — locks when scrolling up, resumes at bottom
 - Rotating hint carousel with suggested questions
 - Responsive layout (desktop panel → full-viewport on mobile)
+- Link tooltips — hover shows the URL before clicking
 
 ## UX Optimizations
 
@@ -22,6 +23,8 @@ A floating AI chat widget built with Quasar + Vue 3.
 **Responsive layout** — `780 × 591 px` floating panel on desktop, full-viewport on screens narrower than 840 px.
 
 **Smart auto-scroll** — Scroll loop runs on every animation frame during streaming. Wheel `deltaY < 0` locks auto-scroll so users can read earlier messages; scrolling back within 20 px of the bottom re-enables it.
+
+**Link tooltips** — Hovering a link in any AI response shows the URL in a tooltip before the user clicks, so they know where they're going.
 
 ## Tech Stack
 
