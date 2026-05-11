@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, useTemplateRef } from 'vue'
 
 const props = defineProps<{
   text: string
@@ -7,7 +7,7 @@ const props = defineProps<{
   visible: boolean
 }>()
 
-const tooltipEl = ref<HTMLElement | null>(null)
+const tooltipEl = useTemplateRef<HTMLElement>('tooltipEl')
 const style = ref({ top: '-9999px', left: '-9999px', opacity: '0' })
 
 watch(() => props.visible, async (visible) => {
@@ -48,7 +48,7 @@ watch(() => props.visible, async (visible) => {
   position: fixed;
   z-index: 9999;
   background: rgba(13, 8, 44, 0.88);
-  color: #fff;
+  color: $white;
   padding: 5px 9px;
   border-radius: 5px;
   font: 400 11px/1.5 'Inter', sans-serif;

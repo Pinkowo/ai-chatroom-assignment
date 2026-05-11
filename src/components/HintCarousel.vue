@@ -6,7 +6,7 @@ interface Hint {
   text: string
 }
 
-defineProps<{
+const props = defineProps<{
   hasMessages: boolean
   motionOff?: boolean
 }>()
@@ -39,7 +39,7 @@ function advance(motionOff: boolean): void {
 }
 
 onMounted(() => {
-  timer = setInterval(() => advance(false), 2500)
+  timer = setInterval(() => advance(props.motionOff ?? false), 2500)
 })
 
 onUnmounted(() => {
