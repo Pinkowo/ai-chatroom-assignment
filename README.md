@@ -4,6 +4,16 @@ A floating AI chat widget built with Quasar + Vue 3.
 
 **[Live Demo](https://pinkowo.github.io/ai-chatroom-assignment)**
 
+## Changelog
+
+### 2025-05-11
+
+- **XSS-safe markdown rendering** — Replaced `v-html` with a custom `MarkdownRenderer` powered by [`streaming-markdown`](https://github.com/thetarnav/streaming-markdown). Output is built entirely through the DOM API; links are validated against an `http/https` allowlist and unsafe schemes are demoted to plain text.
+- **AsyncIterable streaming** — Matcher now returns `AsyncIterable<string>`; the Pinia store consumes it with `for await` and writes chunks directly into the reactive message, removing the previous fixed 1 500 ms delay.
+- **Vue 3.5 best practices** — Migrated template refs to `useTemplateRef()`, replaced animation restart hack with `<Transition>`, fixed SFC section order, corrected `HintCarousel` `motionOff` prop access inside `setInterval`, removed dead `defineExpose`.
+- **Project structure cleanup** — Moved non-API utilities (`mock-data`, `mock-stream`) from `services/` to `utils/`; deleted `markdown-parser.ts` (superseded by `MarkdownRenderer`); removed unused Quasar scaffold files (`EssentialLink`, `ColorCard`, `ColorsPage`, `TypographyPage`) and their routes.
+- **SCSS token** — Added `$white` variable and replaced bare `#fff` hex literals across components.
+
 ## Features
 
 - Typewriter streaming effect for AI responses
@@ -67,6 +77,8 @@ Planned with [Prospec](https://github.com/ci-yang/prospec) — a structured AI p
 ```
 
 Archived changes:
+
+**refactor-code-quality-and-security** — [story](prospec/archive/refactor-code-quality-and-security/proposal.md) · [plan](prospec/archive/refactor-code-quality-and-security/plan.md) · [tasks](prospec/archive/refactor-code-quality-and-security/tasks.md)
 
 **build-ai-chatroom-mvp** — [story](prospec/archive/build-ai-chatroom-mvp/proposal.md) · [plan](prospec/archive/build-ai-chatroom-mvp/plan.md) · [tasks](prospec/archive/build-ai-chatroom-mvp/tasks.md) · [design-spec](prospec/archive/build-ai-chatroom-mvp/design-spec.md) · [interaction-spec](prospec/archive/build-ai-chatroom-mvp/interaction-spec.md)
 
