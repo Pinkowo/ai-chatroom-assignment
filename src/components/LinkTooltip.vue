@@ -43,7 +43,7 @@ watch(() => props.visible, async (visible) => {
   </Teleport>
 </template>
 
-<style>
+<style lang="scss">
 .link-tooltip {
   position: fixed;
   z-index: 9999;
