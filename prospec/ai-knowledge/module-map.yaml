@@ -1,0 +1,54 @@
+modules:
+  md-renderer:
+    path: src/components/MarkdownRenderer.ts
+    status: active
+    depends_on: []
+    used_by: [chat-rendering]
+    key_files:
+      - src/components/MarkdownRenderer.ts
+      - src/tests/markdown-parser.spec.ts
+
+  chat-rendering:
+    path: src/components/
+    status: active
+    depends_on: [md-renderer]
+    used_by: [chat-ui]
+    key_files:
+      - src/components/ChatBubble.vue
+      - src/components/TypewriterText.vue
+      - src/components/LinkTooltip.vue
+
+  chat-ui:
+    path: src/pages/, src/components/
+    status: active
+    depends_on: [chat-rendering, chat-core]
+    used_by: []
+    key_files:
+      - src/pages/IndexPage.vue
+      - src/components/ChatComposer.vue
+      - src/components/ChatHeader.vue
+      - src/components/Launcher.vue
+      - src/components/HintCarousel.vue
+      - src/components/ThinkingBubble.vue
+
+  chat-core:
+    path: src/stores/, src/services/, src/types/
+    status: active
+    depends_on: [utils]
+    used_by: [chat-ui]
+    key_files:
+      - src/stores/chat.ts
+      - src/services/matcher.ts
+      - src/types/chat.ts
+      - src/tests/chat-store.spec.ts
+      - src/tests/matcher.spec.ts
+
+  utils:
+    path: src/utils/
+    status: active
+    depends_on: []
+    used_by: [chat-core]
+    key_files:
+      - src/utils/mock-data.ts
+      - src/utils/mock-stream.ts
+      - src/mock/messages.js
