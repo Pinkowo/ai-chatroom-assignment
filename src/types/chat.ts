@@ -12,13 +12,6 @@ export interface ConversationTurn {
   suggestedQuestion: string | null
 }
 
-export interface MatchResult {
-  content: string
-  score: number
-  isFound: boolean
-  suggestedQuestion: string | null
-}
-
 export interface MockResponse {
   content: string
   suggestedQuestion: string | null

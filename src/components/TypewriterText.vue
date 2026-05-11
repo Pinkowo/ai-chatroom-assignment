@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, watch, onUnmounted } from 'vue'
-import { renderPartial, renderFull } from 'src/services/markdown-parser'
+import MarkdownRenderer from 'src/components/MarkdownRenderer'
 
-const props = defineProps<{ content: string }>()
+const props = defineProps<{ content: string; streaming?: boolean }>()
 const emit = defineEmits<{ (e: 'done'): void }>()
 
 const CHARS_PER_TICK = 1
 const TICK_MS = 22
 
-const html = ref('')
+const visibleContent = ref('')
 let timerId: ReturnType<typeof setTimeout> | null = null
 let position = 0
 
@@ -32,10 +32,10 @@ function tick(): void {
   }
 
   if (position < props.content.length) {
-    html.value = renderPartial(props.content.slice(0, position))
+    visibleContent.value = props.content.slice(0, position)
     timerId = setTimeout(tick, TICK_MS)
   } else {
-    html.value = renderFull(props.content)
+    visibleContent.value = props.content
     timerId = null
     emit('done')
   }
@@ -45,13 +45,13 @@ function startAnimation(): void {
   if (timerId !== null) clearTimeout(timerId)
   timerId = null
   position = 0
-  html.value = ''
+  visibleContent.value = ''
   timerId = setTimeout(tick, TICK_MS)
 }
 
 watch(
   () => props.content,
-  (val) => { if (val) startAnimation() },
+  (val) => { if (val && !props.streaming) startAnimation() },
   { immediate: true }
 )
 
@@ -61,6 +61,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <!-- eslint-disable-next-line vue/no-v-html -->
-  <span v-html="html" />
+  <MarkdownRenderer v-if="streaming" :content="content" :partial="true" />
+  <template v-else>
+    <MarkdownRenderer :content="visibleContent" :partial="true" />
+  </template>
 </template>

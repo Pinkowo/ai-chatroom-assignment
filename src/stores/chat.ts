@@ -38,23 +38,19 @@ export const useChatStore = defineStore(
       })
 
       // Match design.html: minimum 1500ms thinking delay so the indicator is visible
-      const [result] = await Promise.all([
+      const [{ stream, suggestedQuestion }] = await Promise.all([
         match(trimmed),
-        new Promise<void>((resolve) => setTimeout(resolve, 1500)),
+        new Promise<void>((r) => setTimeout(r, 1500)),
       ])
 
-      // Update the turn in-place with the real response
-      turns.value[turnIdx] = {
-        user: userMsg,
-        assistant: {
-          id: turns.value[turnIdx]!.assistant.id,
-          role: 'assistant',
-          content: result.content,
-          timestamp: new Date().toISOString(),
-        },
-        suggestedQuestion: result.suggestedQuestion,
+      // Stream chunks into the assistant message content
+      for await (const chunk of stream) {
+        turns.value[turnIdx]!.assistant.content += chunk
+        turns.value[turnIdx]!.assistant.timestamp = new Date().toISOString()
       }
-      // isThinking stays true until TypewriterText emits 'done' → markThinkingDone()
+
+      turns.value[turnIdx]!.suggestedQuestion = suggestedQuestion
+      isThinking.value = false
     }
 
     function fillComposer(text: string): void {
