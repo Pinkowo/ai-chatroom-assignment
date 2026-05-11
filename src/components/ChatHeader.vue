@@ -35,7 +35,7 @@ defineEmits<{ (e: 'close'): void }>()
 <style scoped lang="scss">
 .chat-header {
   background: $teal-700;
-  color: #fff;
+  color: $white;
   padding: 18px 20px;
   position: relative;
   display: flex;
@@ -66,20 +66,20 @@ defineEmits<{ (e: 'close'): void }>()
   &__h1 {
     margin: 0;
     font: 700 30px/1 'Source Sans 3', 'Source Sans Pro', sans-serif;
-    color: #fff;
+    color: $white;
     letter-spacing: -0.005em;
   }
 
   &__wand {
     font-size: var(--font-size-2xl);
-    color: #fff;
+    color: $white;
     opacity: 0.95;
   }
 
   &__subtitle {
     margin-top: 4px;
     font: 400 var(--font-size-md)/1.5 'Source Sans 3', 'Source Sans Pro', sans-serif;
-    color: #fff;
+    color: $white;
   }
 
   &__actions {
@@ -96,7 +96,7 @@ defineEmits<{ (e: 'close'): void }>()
     border-radius: 4px;
     border: none;
     background: transparent;
-    color: #fff;
+    color: $white;
     opacity: 0.85;
     cursor: pointer;
     display: grid;
@@ -105,7 +105,7 @@ defineEmits<{ (e: 'close'): void }>()
     transition: background 0.15s, opacity 0.15s;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba($white, 0.12);
       opacity: 1;
     }
   }
