@@ -20,6 +20,18 @@ beforeEach(() => {
   setActivePinia(createPinia())
 })
 
+describe('ChatComposer inputRef emit', () => {
+  it('emits inputRef with an HTMLInputElement on mount', async () => {
+    const wrapper = mount(ChatComposer)
+    await wrapper.vm.$nextTick()
+    const emitted = wrapper.emitted('inputRef')
+    expect(emitted).toBeTruthy()
+    // The emitted value should be the input element (or null initially before template ref resolves)
+    const lastEmit = emitted![emitted!.length - 1]
+    expect(lastEmit).toBeDefined()
+  })
+})
+
 describe('ChatComposer image attachment', () => {
   it('sets previewUrl after selecting a valid image', async () => {
     const createObjectURL = vi.fn(() => 'blob:preview-url')

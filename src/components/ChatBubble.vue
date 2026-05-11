@@ -1,41 +1,45 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import TypewriterText from "src/components/TypewriterText.vue";
 import LinkTooltip from "src/components/LinkTooltip.vue";
-import { useChatStore } from "src/stores/chat";
-import { renderFull } from "src/services/markdown-parser";
+import MarkdownRenderer from "src/components/MarkdownRenderer";
 
 const props = defineProps<{
   role: "user" | "assistant";
   content: string;
   animate?: boolean;
+  streaming?: boolean;
 }>();
 
 const emit = defineEmits<{ (e: "animationDone"): void }>();
-
-const store = useChatStore();
 
 const tooltipText = ref("");
 const tooltipAnchor = ref<HTMLElement | null>(null);
 const tooltipVisible = ref(false);
 
 function onDone(): void {
-  store.markThinkingDone();
   emit("animationDone");
 }
 
-function onMouseOver(e: MouseEvent): void {
-  const a = (e.target as HTMLElement).closest<HTMLElement>("a[data-tooltip]");
-  if (!a) return;
-  tooltipText.value = a.dataset.tooltip ?? "";
-  tooltipAnchor.value = a;
-  tooltipVisible.value = true;
-}
+watch(() => props.animate, (val, old) => {
+  if (props.streaming && old && !val) emit("animationDone")
+})
 
-function onMouseOut(e: MouseEvent): void {
-  if ((e.target as HTMLElement).closest("a[data-tooltip]")) {
+// mousemove: continuously track whether cursor is over a tooltip link
+function onMouseMove(e: MouseEvent): void {
+  const a = (e.target as HTMLElement).closest<HTMLElement>("a[data-tooltip]");
+  if (a) {
+    tooltipText.value = a.dataset.tooltip ?? "";
+    tooltipAnchor.value = a;
+    tooltipVisible.value = true;
+  } else {
     tooltipVisible.value = false;
   }
+}
+
+// mouseleave: cursor left the bubble entirely — always hide
+function onMouseLeave(): void {
+  tooltipVisible.value = false;
 }
 </script>
 
@@ -66,14 +70,13 @@ function onMouseOut(e: MouseEvent): void {
       :class="[
         role === 'user' ? 'msg__bubble--user' : 'msg__bubble--ai ai-response',
       ]"
-      @mouseover="onMouseOver"
-      @mouseout="onMouseOut"
+      @mousemove="onMouseMove"
+      @mouseleave="onMouseLeave"
     >
       <template v-if="role === 'user'">{{ content }}</template>
       <template v-else>
-        <TypewriterText v-if="animate" :content="content" @done="onDone" />
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <span v-else v-html="renderFull(content)" />
+        <TypewriterText v-if="animate" :content="content" :streaming="streaming" @done="onDone" />
+        <MarkdownRenderer v-else :content="content" />
       </template>
     </div>
 
@@ -134,8 +137,12 @@ function onMouseOut(e: MouseEvent): void {
   }
 }
 
-// ai-response content styles — applies to both TypewriterText and static v-html
+// ai-response content styles — applies to both TypewriterText and static MarkdownRenderer
 .ai-response {
+  :deep(p) {
+    margin: 0;
+  }
+
   :deep(.num) {
     font-weight: 700;
   }

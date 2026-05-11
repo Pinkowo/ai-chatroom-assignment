@@ -26,7 +26,7 @@ defineEmits<{ (e: 'toggle'): void }>()
   border-radius: 18px;
   border: none;
   background: $orange-400;
-  color: #fff;
+  color: $white;
   font: 600 var(--font-size-sm)/20px 'Inter', sans-serif;
   letter-spacing: 0.005em;
   display: inline-flex;
@@ -45,7 +45,7 @@ defineEmits<{ (e: 'toggle'): void }>()
 
   &__sparkle {
     font-size: var(--font-size-xs);
-    color: #fff;
+    color: $white;
     flex-shrink: 0;
   }
 

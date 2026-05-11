@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted, useTemplateRef } from 'vue'
 import { useChatStore } from 'src/stores/chat'
 
 const emit = defineEmits<{ (e: 'inputRef', el: HTMLInputElement | null): void }>()
 
 const store = useChatStore()
-const inputEl = ref<HTMLInputElement | null>(null)
-const fileInputEl = ref<HTMLInputElement | null>(null)
+const inputEl = useTemplateRef<HTMLInputElement>('textInput')
+const fileInputEl = useTemplateRef<HTMLInputElement>('fileInput')
 const localValue = ref(store.pendingInput)
 const previewUrl = ref<string | null>(null)
 const errorMsg = ref<string | null>(null)
@@ -60,23 +60,19 @@ function handleKeydown(e: KeyboardEvent): void {
   }
 }
 
-function onMounted(el: HTMLInputElement | null): void {
-  inputEl.value = el
-  emit('inputRef', el)
-}
+watch(inputEl, (el) => emit('inputRef', el), { immediate: true })
 
 onUnmounted(() => {
   if (previewUrl.value) URL.revokeObjectURL(previewUrl.value)
 })
 
-defineExpose({ inputEl })
 </script>
 
 <template>
   <div class="chat-input">
     <!-- Hidden file input -->
     <input
-      ref="fileInputEl"
+      ref="fileInput"
       type="file"
       accept="image/*"
       class="chat-input__file-input"
@@ -100,7 +96,7 @@ defineExpose({ inputEl })
     </div>
 
     <input
-      :ref="onMounted"
+      ref="textInput"
       v-model="localValue"
       class="chat-input__field"
       type="text"
@@ -147,7 +143,7 @@ defineExpose({ inputEl })
   flex-wrap: wrap;
   align-items: center;
   gap: 10px 25px;
-  background: #fff;
+  background: $white;
   border-radius: 0 0 8px 8px;
   flex-shrink: 0;
 
@@ -184,7 +180,7 @@ defineExpose({ inputEl })
     border-radius: 50%;
     border: none;
     background: $gray-600;
-    color: #fff;
+    color: $white;
     font-size: var(--font-size-xss);
     line-height: 1;
     cursor: pointer;
@@ -252,7 +248,7 @@ defineExpose({ inputEl })
     border-radius: 50%;
     border: none;
     background: $teal-700;
-    color: #fff;
+    color: $white;
     display: grid;
     place-items: center;
     cursor: pointer;
@@ -278,7 +274,7 @@ defineExpose({ inputEl })
 
     circle {
       fill: none;
-      stroke: #fff;
+      stroke: $white;
       stroke-width: 2.5;
       stroke-linecap: round;
       stroke-dasharray: 56.55;

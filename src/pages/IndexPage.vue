@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onUnmounted } from 'vue'
+import { ref, watch, nextTick, onUnmounted, useTemplateRef } from 'vue'
 import { useChatStore } from 'src/stores/chat'
 import type { ConversationTurn } from 'src/types/chat'
 import Launcher from 'src/components/Launcher.vue'
@@ -12,31 +12,16 @@ import ChatComposer from 'src/components/ChatComposer.vue'
 const store = useChatStore()
 
 const isOpen = ref(false)
-const isClosing = ref(false)
 const welcomeAnimated = ref(false)
-const chatBodyEl = ref<HTMLElement | null>(null)
-const chatPanelEl = ref<HTMLElement | null>(null)
+const chatBodyEl = useTemplateRef<HTMLElement>('chatBodyEl')
 const composerInputEl = ref<HTMLInputElement | null>(null)
 
 function openWidget(): void {
   isOpen.value = true
-  isClosing.value = false
-  // 重新觸發 pop 動畫（v-show 保留 DOM，需手動 reset animation）
-  nextTick(() => {
-    if (chatPanelEl.value) {
-      chatPanelEl.value.style.animation = 'none'
-      void chatPanelEl.value.offsetHeight // force reflow
-      chatPanelEl.value.style.animation = ''
-    }
-  })
 }
 
 function closeWidget(): void {
-  isClosing.value = true
-  setTimeout(() => {
-    isOpen.value = false
-    isClosing.value = false
-  }, 220)
+  isOpen.value = false
 }
 
 function onToggle(): void {
@@ -63,13 +48,10 @@ function scrollToBottom(): void {
   chatBodyEl.value.scrollTop = chatBodyEl.value.scrollHeight
 }
 
-// deltaY < 0 = 向上滾 → 鎖定自動捲動
 function onChatBodyWheel(e: WheelEvent): void {
   if (e.deltaY < 0) userScrolledUp.value = true
 }
 
-// 使用者滾回接近底部（≤20px）→ 解除鎖定
-// rAF 鎖住時不會有 programmatic scroll，此時 scroll 事件只來自使用者，不會誤觸
 function onChatBodyScroll(): void {
   if (!chatBodyEl.value) return
   const { scrollTop, scrollHeight, clientHeight } = chatBodyEl.value
@@ -91,8 +73,6 @@ function onSuggestedBubbleDone(): void {
   suggestedAnimateTurnId.value = null
 }
 
-// While isThinking OR suggested question is animating, keep scrolling on
-// every animation frame so new characters stay in view.
 let scrollRafId: number | null = null
 
 function startScrollLoop(): void {
@@ -127,7 +107,6 @@ watch(suggestedAnimateTurnId, (id) => {
   }
 })
 
-// New turn = user just sent — always scroll to bottom and unlock auto-scroll
 watch(() => store.turns.length, () => {
   userScrolledUp.value = false
   nextTick(scrollToBottom)
@@ -149,70 +128,72 @@ function shouldAnimate(index: number): boolean {
   <div class="chat-widget">
     <Launcher @toggle="onToggle" />
 
-    <div
-      v-show="isOpen || isClosing"
-      class="chat-wrap"
-      :class="{ 'chat-wrap--closing': isClosing }"
-    >
-      <div ref="chatPanelEl" class="chat" role="dialog" aria-label="Nitra AI">
-        <ChatHeader @close="closeWidget" />
+    <Transition name="chat-pop" :duration="{ enter: 340, leave: 220 }">
+      <div
+        v-show="isOpen"
+        class="chat-wrap"
+      >
+        <div class="chat" role="dialog" aria-label="Nitra AI">
+          <ChatHeader @close="closeWidget" />
 
-        <div ref="chatBodyEl" class="chat-body" @wheel.passive="onChatBodyWheel" @scroll.passive="onChatBodyScroll">
-          <!-- Welcome message — only animates on first actual open (v-show keeps DOM alive) -->
-          <ChatBubble
-            role="assistant"
-            content="Welcome to Nitra AI!"
-            :animate="!welcomeAnimated && isOpen"
-            @animation-done="welcomeAnimated = true"
-          />
+          <div ref="chatBodyEl" class="chat-body" @wheel.passive="onChatBodyWheel" @scroll.passive="onChatBodyScroll">
+            <!-- Welcome message — only animates on first actual open (v-show keeps DOM alive) -->
+            <ChatBubble
+              role="assistant"
+              content="Welcome to Nitra AI!"
+              :animate="!welcomeAnimated && isOpen"
+              @animation-done="welcomeAnimated = true"
+            />
 
-          <template v-for="(turn, idx) in store.turns" :key="turn.user.id">
-            <!-- User message -->
-            <div class="msg msg--user">
-              <div class="msg__bubble msg__bubble--user">
-                <img
-                  v-if="turn.user.imageUrl"
-                  :src="turn.user.imageUrl"
-                  class="msg__bubble-image"
-                  alt="attached image"
-                />
-                <span v-if="turn.user.content">{{ turn.user.content }}</span>
+            <template v-for="(turn, idx) in store.turns" :key="turn.user.id">
+              <!-- User message -->
+              <div class="msg msg--user">
+                <div class="msg__bubble msg__bubble--user">
+                  <img
+                    v-if="turn.user.imageUrl"
+                    :src="turn.user.imageUrl"
+                    class="msg__bubble-image"
+                    alt="attached image"
+                  />
+                  <span v-if="turn.user.content">{{ turn.user.content }}</span>
+                </div>
               </div>
-            </div>
 
-            <!-- Thinking indicator -->
-            <ThinkingBubble
-              v-if="isLatestTurn(idx) && store.isThinking && !turn.assistant.content"
+              <!-- Thinking indicator -->
+              <ThinkingBubble
+                v-if="isLatestTurn(idx) && store.isThinking && !turn.assistant.content"
+              />
+
+              <!-- AI response -->
+              <ChatBubble
+                v-else-if="turn.assistant.content"
+                role="assistant"
+                :content="turn.assistant.content"
+                :animate="shouldAnimate(idx)"
+                :streaming="isLatestTurn(idx) && store.isThinking"
+                @animation-done="onMainBubbleDone(turn)"
+              />
+
+              <!-- Suggested question — second bubble, shown after streaming completes -->
+              <ChatBubble
+                v-if="turn.suggestedQuestion && turn.assistant.content && !(isLatestTurn(idx) && store.isThinking)"
+                role="assistant"
+                :content="turn.suggestedQuestion"
+                :animate="suggestedAnimateTurnId === turn.user.id"
+                @animation-done="onSuggestedBubbleDone"
+              />
+            </template>
+
+            <HintCarousel
+              :has-messages="store.turns.length > 0"
+              @select="onHintSelect"
             />
+          </div>
 
-            <!-- AI response -->
-            <ChatBubble
-              v-else-if="turn.assistant.content"
-              role="assistant"
-              :content="turn.assistant.content"
-              :animate="shouldAnimate(idx)"
-              @animation-done="onMainBubbleDone(turn)"
-            />
-
-            <!-- Suggested question — second bubble, shown after streaming completes -->
-            <ChatBubble
-              v-if="turn.suggestedQuestion && turn.assistant.content && !(isLatestTurn(idx) && store.isThinking)"
-              role="assistant"
-              :content="turn.suggestedQuestion"
-              :animate="suggestedAnimateTurnId === turn.user.id"
-              @animation-done="onSuggestedBubbleDone"
-            />
-          </template>
-
-          <HintCarousel
-            :has-messages="store.turns.length > 0"
-            @select="onHintSelect"
-          />
+          <ChatComposer @input-ref="onInputRef" />
         </div>
-
-        <ChatComposer @input-ref="onInputRef" />
       </div>
-    </div>
+    </Transition>
   </div>
   </q-page>
 </template>
@@ -241,23 +222,26 @@ function shouldAnimate(index: number): boolean {
 .chat {
   width: 780px;
   height: 591px;
-  background: #fff;
+  background: $white;
   border-radius: 8px;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transform-origin: bottom right;
-  animation: chat-pop 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
 
-.chat-wrap--closing .chat {
+.chat-pop-enter-active .chat {
+  animation: chat-pop 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.chat-pop-leave-active .chat {
   animation: chat-pop-out 0.22s ease forwards;
 }
 
 .chat-body {
   flex: 1;
-  background: #fff;
+  background: $white;
   padding: 32px 20px 20px;
   overflow-y: auto;
   display: flex;

@@ -3,12 +3,18 @@ import { setActivePinia, createPinia } from 'pinia'
 import { useChatStore } from 'src/stores/chat'
 
 vi.mock('src/services/matcher', () => ({
-  match: vi.fn().mockResolvedValue({
-    content: 'Mock response content',
-    score: 0.1,
-    isFound: true,
+  match: vi.fn().mockImplementation(async () => ({
+    stream: (async function* () {
+      yield 'Mock'
+      yield ' res'
+      yield 'pon'
+      yield 'se '
+      yield 'con'
+      yield 'ten'
+      yield 't'
+    })(),
     suggestedQuestion: null,
-  }),
+  })),
 }))
 
 beforeEach(() => {
@@ -45,11 +51,17 @@ describe('useChatStore', () => {
       expect(store.turns[0]!.user.role).toBe('user')
     })
 
-    it('stores the assistant message from matcher', async () => {
+    it('stores the assistant message from matcher (chunks concatenated)', async () => {
       const store = useChatStore()
       await sendAndFlush(store, 'test question')
       expect(store.turns[0]!.assistant.content).toBe('Mock response content')
       expect(store.turns[0]!.assistant.role).toBe('assistant')
+    })
+
+    it('sets isThinking to false after streaming completes', async () => {
+      const store = useChatStore()
+      await sendAndFlush(store, 'test question')
+      expect(store.isThinking).toBe(false)
     })
 
     it('clears pendingInput after sending', async () => {

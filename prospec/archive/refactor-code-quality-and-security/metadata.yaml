@@ -1,0 +1,13 @@
+name: refactor-code-quality-and-security
+status: archived
+created: 2026-05-11
+archived: 2026-05-11
+description: Comprehensive code quality and security overhaul — XSS elimination via MarkdownRenderer, SSE-compatible streaming architecture, Vue idiom corrections, project structure cleanup, and CSS token compliance.
+priority: P1
+related_modules:
+  - MarkdownRenderer
+  - ChatBubble
+  - TypewriterText
+  - ChatComposer
+  - chat-store
+  - matcher
