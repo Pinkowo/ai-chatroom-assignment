@@ -8,11 +8,11 @@ A floating AI chat widget built with Quasar + Vue 3.
 
 ### 2025-05-11
 
-- **XSS-safe markdown rendering** — Replaced `v-html` with a custom `MarkdownRenderer` powered by [`streaming-markdown`](https://github.com/thetarnav/streaming-markdown). Output is built entirely through the DOM API; links are validated against an `http/https` allowlist and unsafe schemes are demoted to plain text.
-- **AsyncIterable streaming** — Matcher now returns `AsyncIterable<string>`; the Pinia store consumes it with `for await` and writes chunks directly into the reactive message, removing the previous fixed 1 500 ms delay.
-- **Vue 3.5 best practices** — Migrated template refs to `useTemplateRef()`, replaced animation restart hack with `<Transition>`, fixed SFC section order, corrected `HintCarousel` `motionOff` prop access inside `setInterval`, removed dead `defineExpose`.
-- **Project structure cleanup** — Moved non-API utilities (`mock-data`, `mock-stream`) from `services/` to `utils/`; deleted `markdown-parser.ts` (superseded by `MarkdownRenderer`); removed unused Quasar scaffold files (`EssentialLink`, `ColorCard`, `ColorsPage`, `TypographyPage`) and their routes.
-- **SCSS token** — Added `$white` variable and replaced bare `#fff` hex literals across components.
+- **Simulated SSE streaming** — AI responses used to appear all at once after a fixed 1500ms delay. Now the mock backend streams chunks one by one, so the typewriter effect feels like a real AI response.
+- **Safe Markdown rendering** — Replaced `v-html` with a custom renderer that builds the DOM directly, preventing XSS. Links are blocked unless they start with `http` or `https`.
+- **Vue 3.5 updates** — Adopted `useTemplateRef()`, fixed SFC section order, corrected a prop access bug in `HintCarousel`, removed unused code.
+- **Project cleanup** — Moved utility files to the right folders, deleted files that are no longer used.
+- **SCSS variable** — Added a `$white` token to replace hardcoded `#fff` values scattered across components.
 
 ## Features
 
